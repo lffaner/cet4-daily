@@ -75,12 +75,16 @@
     const date = getDate();
     const tasks = state.tasks[date] || [false, false, false];
     tasks[0] = true; state.tasks[date] = tasks;
-    if (!day.logged) {
-      const choices = day.newIds.map(word => day.answers[`new:${word}`]);
-      state.wordRounds.push({ date, mode: '每日刷词', total: s.newTotal + s.reviewTotal,
-        reviewed: s.newDone + s.reviewDone, known: choices.filter(x => x === 'known').length,
+    const priorNew = day.loggedNewCount || 0;
+    const priorReview = day.loggedReviewCount || 0;
+    if (s.newDone > priorNew || s.reviewDone > priorReview) {
+      const choices = day.newIds.slice(priorNew).map(word => day.answers[`new:${word}`]);
+      const amount = s.newDone - priorNew + s.reviewDone - priorReview;
+      state.wordRounds.push({ date, mode: '每日刷词', total: amount,
+        reviewed: amount, known: choices.filter(x => x === 'known').length,
         weak: choices.filter(x => x === 'weak').length, time: new Date().toISOString(), autoSaved: true });
-      day.logged = true;
+      day.loggedNewCount = s.newDone;
+      day.loggedReviewCount = s.reviewDone;
     }
     persist();
   }
@@ -145,7 +149,8 @@
     feedback = choice === 'weak' ? '已加入明日复习，并排到今天末尾再练一次' : '已保存；按 1、3、7 天安排复习';
     flipped = false;
     checkCompletion();
-    persist(); renderWord(); renderToday();
+    if (!persist()) feedback = '保存失败，请到学习记录页导出备份。';
+    renderWord(); renderToday();
   }
   $('vCard').onclick = () => { flipped = !flipped; renderWord(); };
   $('vSpeak').onclick = () => speak(0.95);

@@ -73,7 +73,7 @@
     let stage = old.stage || 0;
     let due;
     if (choice === 'weak') { stage = 0; due = addDays(date, 1); }
-    else if (item.kind === 'new' || item.kind === 'legacy' || item.kind === 'retry') {
+    else if (item.kind === 'new' || item.kind === 'legacy' || item.kind === 'retry' || item.kind === 'weak') {
       stage = 0; due = addDays(date, 1);
     } else {
       stage = Math.min(stage + 1, 3);
