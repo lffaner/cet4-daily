@@ -69,7 +69,7 @@
     const listenTask = quizTask('listening');
     const readTask = quizTask('reading');
     const labels = [
-      ['单词', '5 分钟 · 标记 5 个词（记住了 / 还不会）', 'words', `已标记 ${wordCount}/5`],
+      ['单词', '5 分钟 · 标记 5 个词', 'words', `${wordCount}/5 词`],
       ['听力', listenTask.detail, 'listening', listenTask.status],
       ['阅读', readTask.detail, 'reading', readTask.status]
     ];
