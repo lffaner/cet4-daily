@@ -17,6 +17,9 @@ button,select,input{touch-action:manipulation}
 .reading-switch button.on{background:var(--blue);color:#fff}
 .retry-inline{min-height:44px}
 .vocab-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:13px 0}
+.vocab-target{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin:8px 0 10px}
+.vocab-target label{font-weight:650}
+.vocab-target select{min-height:44px;font-size:16px}
 .vocab-tabs button{padding:9px 5px;font-size:13px;min-height:44px}
 .vocab-tabs button.on{background:#eaf2ff;color:#1951ac;border-color:#b5cff9}
 .vocab-card{display:block;width:100%;margin:8px 0 12px;min-height:215px}

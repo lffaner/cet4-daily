@@ -13,6 +13,7 @@
   const root = $('words');
   root.innerHTML = `<div class="panel vocab-panel">
     <div class="flex"><h2 class="grow">每日刷词</h2><span class="tag" id="vTotal"></span></div>
+    <div class="vocab-target"><label for="vTarget">每天新词</label><select id="vTarget" aria-label="每天新词数量"><option value="25">25 个</option><option value="35">35 个</option><option value="45">45 个</option><option value="60">60 个</option></select><span class="muted small">旧词复习另算</span></div>
     <p class="small muted" id="vPlan"></p>
     <div class="vocab-tabs" role="group" aria-label="单词模式">
       <button type="button" data-v-mode="today">今日学习</button>
@@ -37,8 +38,12 @@
   function dayPlan() {
     const date = getDate();
     const fresh = !state.vocab?.days?.[date];
-    const day = core.ensureDay(state, date, bank);
-    if (fresh) persist();
+    const target = state.vocab?.dailyTarget || 45;
+    const day = core.ensureDay(state, date, bank, target);
+    let expanded = false;
+    if (!fresh && day.newIds.length < target && core.stats(day).newDone < day.newIds.length)
+      expanded = core.resizeDay(state, date, bank, target).changed > 0;
+    if (fresh || expanded) persist();
     return day;
   }
   window.getVocabTask = () => {
@@ -49,6 +54,8 @@
   state.tasks ||= {};
   state.wordRounds ||= [];
   core.ensure(state, getDate());
+  if (![25, 35, 45, 60].includes(state.vocab.dailyTarget)) state.vocab.dailyTarget = 45;
+  $('vTarget').value = String(state.vocab.dailyTarget);
   if (!modes.includes(state.vocab.ui.mode)) state.vocab.ui.mode = 'today';
   let flipped = false;
   let feedback = '';
@@ -94,7 +101,7 @@
     const mode = state.vocab.ui.mode;
     const { item, index, total } = current();
     $('vTotal').textContent = `${bank.length} 个新词`; 
-    $('vPlan').textContent = `今日新词 ${s.newDone}/${s.newTotal} · 到期复习 ${s.reviewDone}/${s.reviewTotal}` + (s.retryPending ? ` · 再记 ${s.retryPending}` : '');
+    $('vPlan').textContent = `今日新词 ${s.newDone}/${s.newTotal} · 到期复习 ${s.reviewDone}/${s.reviewTotal}` + (s.retryPending ? ` · 再记 ${s.retryPending}` : '') + (s.newTotal > state.vocab.dailyTarget ? ` · 明日起按 ${state.vocab.dailyTarget} 个` : '');
     $('vBar').style.width = (day.queue.length ? (day.queue.length - s.remaining) / day.queue.length * 100 : 0) + '%';
     root.querySelectorAll('[data-v-mode]').forEach(button => button.classList.toggle('on', button.dataset.vMode === mode));
     $('vMore').classList.toggle('hidden', mode !== 'today' || s.remaining > 0 || s.newTotal === 0);
@@ -177,6 +184,20 @@
     state.vocab.ui.mode = button.dataset.vMode;
     flipped = false; feedback = ''; persist(); renderWord();
   });
+  $('vTarget').onchange = () => {
+    const target = +$('vTarget').value;
+    state.vocab.dailyTarget = target;
+    const day = dayPlan();
+    const wasComplete = core.stats(day).remaining === 0;
+    const result = core.resizeDay(state, getDate(), bank, target);
+    if (result.changed > 0 && wasComplete) {
+      const tasks = state.tasks[getDate()] || [false, false, false];
+      tasks[0] = false; state.tasks[getDate()] = tasks;
+    }
+    feedback = result.deferred ? `今日已有作答，本轮保持 ${day.newIds.length} 个；明天起改为 ${target} 个。`
+      : `已设为每天 ${target} 个新词，旧词复习另算。`;
+    flipped = false; persist(); renderWord(); renderToday();
+  };
   $('vMore').onclick = () => {
     const count = core.extendDay(state, getDate(), bank, 25);
     feedback = count ? `已加入 ${count} 个新词` : '词库已学完，可以继续复习旧词。';
@@ -193,6 +214,8 @@
     state.tasks ||= {};
     state.wordRounds ||= [];
     core.ensure(state, getDate());
+    if (![25, 35, 45, 60].includes(state.vocab.dailyTarget)) state.vocab.dailyTarget = 45;
+    $('vTarget').value = String(state.vocab.dailyTarget);
     dayPlan(); renderWord(); renderToday();
   };
   dayPlan(); renderWord(); renderToday();

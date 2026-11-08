@@ -25,7 +25,7 @@
     }
     return v;
   }
-  function ensureDay(state, date, bank, dailyTarget = 25) {
+  function ensureDay(state, date, bank, dailyTarget = 45) {
     const v = ensure(state, date);
     if (v.days[date]) return v.days[date];
     const pending = [];
@@ -105,5 +105,19 @@
     day.logged = false;
     return next.length;
   }
-  return { addDays, ensure, ensureDay, stats, pendingIndex, answer, extendDay, key };
+  function resizeDay(state, date, bank, target) {
+    const day = ensureDay(state, date, bank, target);
+    const before = day.newIds.length;
+    if (target > before) return { changed: extendDay(state, date, bank, target - before), deferred: false };
+    if (target < before) {
+      if (stats(day).newDone) return { changed: 0, deferred: true };
+      const removed = new Set(day.newIds.slice(target));
+      day.newIds = day.newIds.slice(0, target);
+      day.queue = day.queue.filter(item => item.kind !== 'new' || !removed.has(item.word));
+      day.cursor = pendingIndex(day, Math.min(day.cursor, day.queue.length));
+      return { changed: target - before, deferred: false };
+    }
+    return { changed: 0, deferred: false };
+  }
+  return { addDays, ensure, ensureDay, stats, pendingIndex, answer, extendDay, resizeDay, key };
 });
