@@ -17,8 +17,15 @@
     try { localStorage.setItem(KEY, JSON.stringify(state)); return true; }
     catch (e) { alert('浏览器存储空间不足或不可用。请先导出学习记录备份。'); return false; }
   }
-  function today() { return fmt(new Date()); }
-  function addDays(n) { const d = new Date(); d.setHours(12, 0, 0, 0); d.setDate(d.getDate() + n); return fmt(d); }
+  function today() {
+    const parts = new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Shanghai', year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(new Date());
+    const value = name => parts.find(part => part.type === name).value;
+    return `${value('year')}-${value('month')}-${value('day')}`;
+  }
+  function addDays(n) {
+    const [year, month, day] = today().split('-').map(Number);
+    return new Date(Date.UTC(year, month - 1, day + n)).toISOString().slice(0, 10);
+  }
   function key(type, paper, no) { return type + ':' + paper + ':' + no; }
   function label(type) { return type === 'listening' ? '听力' : '阅读'; }
   function html(s) { return escapeHTML(s); }
@@ -50,6 +57,7 @@
     const root = $(type === 'listening' ? 'listenQuiz' : 'readQuiz');
     const check = root.querySelector('#checkQuiz');
     if (!check) return;
+    root.dataset.autoSaved = '';
     check.addEventListener('click', () => {
       if (root.dataset.autoSaved === 'yes' || root.dataset.checked !== 'yes') return;
       ensureData();
@@ -191,6 +199,8 @@
     });
     $('reasonSelect').onchange = saveReason;
     $('reasonNote').onchange = saveReason;
+    let noteTimer;
+    $('reasonNote').oninput = () => { clearTimeout(noteTimer); noteTimer = setTimeout(saveReason, 350); };
     $('backReview').onclick = () => {
       cleanupAudio(); selectedId = ''; root.innerHTML = ''; $('reviewList').classList.remove('hidden');
       renderReviewList();
@@ -282,4 +292,5 @@
   ensureData();
   renderReviewList();
 })();
+
 

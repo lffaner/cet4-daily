@@ -1,0 +1,52 @@
+:root{--bottom-height:74px}
+html{scroll-behavior:smooth}
+body{padding-bottom:env(safe-area-inset-bottom)}
+button,select,input{touch-action:manipulation}
+.app-toast{position:fixed;left:50%;bottom:calc(var(--bottom-height) + env(safe-area-inset-bottom) + 12px);transform:translateX(-50%);z-index:20;background:#173b63;color:#fff;padding:8px 15px;border-radius:100px;box-shadow:0 6px 22px #173b6340;font-size:13px;max-width:90vw;text-align:center;pointer-events:none;opacity:0;transition:opacity .18s}
+.app-toast.visible{opacity:1}
+.home-title{font-size:22px;margin:0 0 5px}
+.home-date{color:var(--muted);font-size:13px}
+.home-continue,.home-task{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;text-align:left;min-height:62px;margin:9px 0;padding:13px 15px}
+.home-continue{background:var(--blue);border-color:var(--blue);color:#fff;font-weight:700;font-size:17px}
+.home-task strong{display:block;font-size:16px}
+.home-task span{font-size:13px;color:var(--muted)}
+.home-task.done{border-color:#b6e6ce;background:#f0fbf5}
+.home-task .status{font-size:13px;white-space:nowrap;color:#178454}
+.reading-switch{position:sticky;top:0;z-index:2;display:flex;gap:8px;padding:9px 0;background:var(--bg)}
+.reading-switch button{flex:1;min-height:44px}
+.reading-switch button.on{background:var(--blue);color:#fff}
+.retry-inline{min-height:44px}
+@media(max-width:700px){
+  body{font-size:15px}
+  .wrap{padding:10px 12px calc(100px + env(safe-area-inset-bottom));max-width:600px}
+  .hero{padding:16px 18px;border-radius:16px;margin-bottom:12px}
+  .hero h1{font-size:21px}
+  .hero p,.hero .chips{display:none}
+  nav{position:fixed;left:0;right:0;top:auto;bottom:0;z-index:10;margin:0;padding:5px 6px calc(5px + env(safe-area-inset-bottom));display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:2px;overflow:visible;background:#fff;border-top:1px solid var(--line);box-shadow:0 -5px 18px #16324d12}
+  nav button{padding:5px 0;border:0;background:transparent;border-radius:9px;min-height:56px;white-space:normal;font-size:11px;line-height:1.25;color:#597082}
+  nav button::before{content:attr(data-icon);display:block;font-size:21px;line-height:1.25;margin-bottom:2px}
+  nav button.on{background:#eaf2ff;color:#1951ac;border:0}
+  nav button[data-tab="history"],nav button[data-tab="help"]{display:none}
+  .panel{padding:15px;border-radius:15px}
+  .panel h2{font-size:19px}
+  .grid{gap:7px}
+  .stat{padding:10px}
+  .stat strong{font-size:21px}
+  .card{min-height:190px;padding:22px 14px}
+  .choice{min-height:48px;padding:11px}
+  #words .flex button{min-height:44px}
+  #words #prevWord,#words #nextWord{flex:1}
+  #words #flipWord,#words #speakWord,#words #speakSlow{flex:1 1 42%}
+  #finishWords,#resetWordRound{display:none}
+  #listening .panel>.flex,#reading .panel>.flex{align-items:stretch}
+  #listening .panel>.flex>button,#reading .panel>.flex>button{flex:1}
+  .reading-switch~.reading-passage{scroll-margin-top:60px}
+  #readQuiz{scroll-margin-top:60px}
+  #reading[data-view="questions"] #readPassage{display:none}
+  #reading[data-view="passage"] #readQuiz{display:none}
+  #reading[data-view="passage"] #nextRead{display:none}
+  #readPassage details{margin-top:0}
+  .passage-text{max-height:none;font-size:16px;line-height:1.9}
+  .review-card{scroll-margin-top:14px}
+  select,input[type=date]{font-size:16px}
+}
