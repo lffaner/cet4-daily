@@ -16,6 +16,21 @@ button,select,input{touch-action:manipulation}
 .reading-switch button{flex:1;min-height:44px}
 .reading-switch button.on{background:var(--blue);color:#fff}
 .retry-inline{min-height:44px}
+.vocab-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:13px 0}
+.vocab-tabs button{padding:9px 5px;font-size:13px;min-height:44px}
+.vocab-tabs button.on{background:#eaf2ff;color:#1951ac;border-color:#b5cff9}
+.vocab-card{display:block;width:100%;margin:8px 0 12px;min-height:215px}
+.vocab-card .word{line-height:1.25;overflow-wrap:anywhere}
+.vocab-card p{margin:9px 0}
+.vocab-card .answer{margin:14px 0 8px}
+.vocab-sound,.vocab-answers,.vocab-move{display:flex;gap:8px;margin:8px 0}
+.vocab-sound button,.vocab-answers button,.vocab-move button{flex:1;min-height:48px}
+.vocab-answers button{font-weight:700;font-size:16px;min-height:54px}
+.vocab-answers #vWeak{background:#fff7ea;border-color:#f3d5a4;color:#80500c}
+.vocab-empty{font-size:17px}
+.vocab-empty p{font-size:14px;color:var(--muted)}
+.vocab-source{border-top:1px solid var(--line);padding-top:13px;margin-top:18px}
+#vMore{width:100%;border-color:#99c5ff;color:#1653a3;font-weight:700}
 @media(max-width:700px){
   body{font-size:15px}
   .wrap{padding:10px 12px calc(100px + env(safe-area-inset-bottom));max-width:600px}

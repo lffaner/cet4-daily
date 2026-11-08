@@ -51,6 +51,7 @@
     const due = Object.values(state.mistakes || {}).filter(x => x && !x.mastered && x.due && x.due <= d).length;
     const last = state.studyUi.lastTab;
     const resume = ['words', 'listening', 'reading', 'review'].includes(last) ? last : (due ? 'review' : 'words');
+    const vocabTask = window.getVocabTask?.();
     const wordCount = Math.min(5, Object.keys(state.dailyWordMarks[d] || {}).length);
     const quizTask = type => {
       const paper = state.studyUi[type + 'Paper'] || $(type === 'listening' ? 'listenPaper' : 'readPaper').value;
@@ -69,7 +70,7 @@
     const listenTask = quizTask('listening');
     const readTask = quizTask('reading');
     const labels = [
-      ['单词', '5 分钟 · 标记 5 个词', 'words', `${wordCount}/5 词`],
+      ['单词', vocabTask ? `${vocabTask.newTotal} 个新词 · ${vocabTask.reviewTotal} 个到期复习` : '5 分钟 · 标记 5 个词', 'words', vocabTask ? `${vocabTask.newDone}/${vocabTask.newTotal} 新` : `${wordCount}/5 词`],
       ['听力', listenTask.detail, 'listening', listenTask.status],
       ['阅读', readTask.detail, 'reading', readTask.status]
     ];
