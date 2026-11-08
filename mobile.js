@@ -51,12 +51,33 @@
     const due = Object.values(state.mistakes || {}).filter(x => x && !x.mastered && x.due && x.due <= d).length;
     const last = state.studyUi.lastTab;
     const resume = ['words', 'listening', 'reading', 'review'].includes(last) ? last : (due ? 'review' : 'words');
-    const labels = [['单词', '复习 5 个词', 'words'], ['听力', '完成一组真题', 'listening'], ['阅读', '完成一组真题', 'reading']];
+    const wordCount = Math.min(5, Object.keys(state.dailyWordMarks[d] || {}).length);
+    const quizTask = type => {
+      const paper = state.studyUi[type + 'Paper'] || $(type === 'listening' ? 'listenPaper' : 'readPaper').value;
+      const session = state.studyProgress[type]?.[paper] || {};
+      const limit = type === 'listening' ? 25 : 10;
+      const offset = Math.max(0, Math.min(limit, +session.offset || 0));
+      if (offset === limit) return { detail: '本套已做完 · 选择另一套真题', status: '换一套 ›' };
+      const start = (type === 'listening' ? 1 : 46) + offset;
+      const end = Math.min(type === 'listening' ? 25 : 55, start + step(type) - 1);
+      const selected = Array.from({ length: end - start + 1 }, (_, i) => session.choices?.[start + i]).filter(Boolean).length;
+      return {
+        detail: `${type === 'listening' ? '10 分钟 · 听对应段落' : '10 分钟 · 读对应原文'}，核对第 ${start}—${end} 题`,
+        status: selected ? `已选 ${selected}/${end - start + 1} 题` : '开始 ›'
+      };
+    };
+    const listenTask = quizTask('listening');
+    const readTask = quizTask('reading');
+    const labels = [
+      ['单词', '5 分钟 · 标记 5 个词（记住了 / 还不会）', 'words', `已标记 ${wordCount}/5`],
+      ['听力', listenTask.detail, 'listening', listenTask.status],
+      ['阅读', readTask.detail, 'reading', readTask.status]
+    ];
     homePanel.innerHTML = `<div class="home-date">${escapeHTML(d)} · 北京时间 · 距考试 ${$('daysLeft').textContent} 天</div>` +
-      `<h2 class="home-title">今天学一点</h2><p class="muted small">已完成 ${done.filter(Boolean).length}/3 项${due ? ` · ${due} 道错题待复习` : ''}</p>` +
+      `<h2 class="home-title">今日待办</h2><p class="muted small">已完成 ${done.filter(Boolean).length}/3 项${due ? ` · ${due} 道错题待复习` : ''}</p>` +
       `<button class="home-continue" data-go="${resume}"><span>继续${resume === 'review' ? '错题复习' : resume === 'words' ? '背单词' : resume === 'listening' ? '听力练习' : '阅读练习'}</span><span>›</span></button>` +
-      labels.map(([name, hint, tab], i) => `<button class="home-task ${done[i] ? 'done' : ''}" data-go="${tab}"><span><strong>${name}</strong><span>${hint}</span></span><span class="status">${done[i] ? '已完成 ✓' : '开始 ›'}</span></button>`).join('') +
-      (due ? `<button class="home-task" data-go="review"><span><strong>待复习错题</strong><span>${due} 道待测</span></span><span class="status">开始 ›</span></button>` : '') +
+      labels.map(([name, hint, tab, status], i) => `<button class="home-task ${done[i] ? 'done' : ''}" data-go="${tab}"><span><strong>${name}</strong><span>${escapeHTML(hint)}</span></span><span class="status">${done[i] ? '已完成 ✓' : status}</span></button>`).join('') +
+      (due ? `<button class="home-task" data-go="review"><span><strong>待复习错题</strong><span>今日到期 ${due} 题 · 重听或重读后复测</span></span><span class="status">去复测 ›</span></button>` : '') +
       '<p class="small muted"><button data-go="history">学习记录与备份</button> <button data-go="help">使用说明</button></p>';
     homePanel.querySelectorAll('[data-go]').forEach(b => b.onclick = () => showTab(b.dataset.go));
   };
